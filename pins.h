@@ -1,3 +1,5 @@
+// Copyright © 2026 Isaiah Stone. All Rights Reserved.
+// Unauthorized copying or distribution of this file is strictly prohibited.
 #ifndef ROBOT_PINS_H
 #define ROBOT_PINS_H
 #include <Arduino.h>
