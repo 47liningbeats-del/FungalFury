@@ -186,7 +186,7 @@ bool forksWereAboveHalf = false;
 uint16_t escPulseUs = ESC_STOP_US;
 uint16_t armCurrentUs = ARM_IN_US;
 uint16_t forkCurrentUs = FORK_DOWN_US;
-uint16_t ballastCurrentUs = BALLAST_CENTER_US;
+uint16_t ballastCurrentUs = BALLAST_REAR_US;
 int16_t motorDutyCurrent[MOTOR_COUNT] = {0, 0};
 int16_t motorDutyTarget[MOTOR_COUNT] = {0, 0};
 uint16_t sonarMm[SENSOR_COUNT] = {0, 0, 0, 0};
@@ -422,7 +422,10 @@ void updateServos() {
 
   int16_t trim = (int16_t)map(readChannel(3), PPM_VALID_MIN_US, PPM_VALID_MAX_US,
                               -BALLAST_TRIM_LIMIT_US, BALLAST_TRIM_LIMIT_US);
-  int32_t ballastTarget = (int32_t)BALLAST_CENTER_US + trim + ballastAutoOffsetUs;
+  // No tip: rear-biased by default; elevated forks shift the baseline to center.
+  // CH4 trim and automatic tip correction remain additive to that baseline.
+  const uint16_t ballastBaseUs = forksAboveHalf ? BALLAST_CENTER_US : BALLAST_REAR_US;
+  int32_t ballastTarget = (int32_t)ballastBaseUs + trim + ballastAutoOffsetUs;
   const uint16_t minBallast = min(BALLAST_REAR_US, BALLAST_FRONT_US);
   const uint16_t maxBallast = max(BALLAST_REAR_US, BALLAST_FRONT_US);
   ballastTarget = constrain(ballastTarget, minBallast, maxBallast);
@@ -517,7 +520,7 @@ void setup() {
   sawEsc.writeMicroseconds(ESC_STOP_US);
   sawArmServo.writeMicroseconds(ARM_IN_US);
   forkServo.writeMicroseconds(FORK_DOWN_US);
-  ballastServo.writeMicroseconds(BALLAST_CENTER_US);
+  ballastServo.writeMicroseconds(BALLAST_REAR_US);
 
   bootStartedMs = millis();
   driveRampAtMs = bootStartedMs;
